@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>嘟嘟侠</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        .banner{
+            position:relative;
+            width:538px;
+            height:405px;
+            margin:100px auto;
+            border:3px solid blue;
+            overflow:hidden;
+        }
+        .banner .bth span{
+            position:absolute;
+            top:0;
+            bottom:0;
+            width:50px;
+            height:70px;
+            margin:auto;
+            font-size:30px;
+            color:#fff;
+            line-height:70px;
+            text-align:center;
+            background-color:rgba(0,0,0,.5);
+            cursor:pointer;
+        }
+        .bth .next{
+            right:0;
+        }
+        .banner .bthList{
+            position:absolute;
+            left:0;
+            right:0;
+            bottom:20px;
+            margin:auto;
+            width:36%;
+            background-color:rgba(0,0,0,.5);
+        }
+        .banner .bthList span{
+            float:left;
+            width:20px;
+            height:20px;
+            margin:0 6px;
+            border-radius:50%;
+            background-color:rgba(255,255,255,.5);
+            cursor: pointer;
+        }
+        .banner .bthList .on{
+            position:absolute;
+            left:0;
+            background-color:red;
+        }
+        .banner ul{
+            position:absolute;
+            left:-538px;
+            list-style-type:none;
+            width:1000%;
+        }
+        .banner ul:after{
+            content: '';
+            display:block;
+            clear: both;
+        }
+        .banner li{
+            float:left;
+        }
+    </style>
+</head>
+<body>
+<div class="banner">
+    <ul>
+        <li><img src="images/6.jpg" alt=""></li>
+        <li><img src="images/1.jpg" alt=""></li>
+        <li><img src="images/2.jpg" alt=""></li>
+        <li><img src="images/3.jpg" alt=""></li>
+        <li><img src="images/4.jpg" alt=""></li>
+        <li><img src="images/5.jpg" alt=""></li>
+        <li><img src="images/6.jpg" alt=""></li>
+        <li><img src="images/1.jpg" alt=""></li>
+    </ul>
+    <div class="bth">
+        <span class="pre">&lt;</span>
+        <span class="next">&gt;</span>
+    </div>
+    <div class="bthList">
+        <span class="on"></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+<script src="animation.js"></script>
+<script>
+    var oUl = document.getElementsByTagName('ul')[0];
+    var oLeft = document.getElementsByClassName('pre')[0];
+    var oRight = document.getElementsByClassName('next')[0];
+    var oBall = document.getElementsByClassName('on')[0];
+    var oSpan = document.querySelectorAll('.bthList span:not(.on)');
+    var oBthList = document.getElementsByClassName('bthList')[0];
+    var len = oUl.children.length-2;
+    var moveImg = 538;        // 存储图片移动一次的距离
+    var moveBall = 32;        // 存储小球移动一次的距离
+    var index = 0;      // 记录点击次数
+
+    // 记住设置时间，否则点击过快会出现bug
+    var now = new Date();       // 记录当前时间
+
+    // 点击左边轮播
+    /*
+    *   index       right
+    *   0           -538
+    *   -1           -538+538 = 0
+    *
+    * */
+    oLeft.addEventListener('click',function(){  // 让oUl运动
+        if(new Date() - now<300)return;         // 如果最新时间减去初始时间小于三百，则不执行函数
+        now = new Date();                       // now变量存储最新的时间
+        index--;
+        // console.log(index);
+        animation(oUl,{
+            // left:-538 + (-moveImg*index)
+            left:-moveImg*(index+1)
+        },0.3,function(){
+            console.log(index);
+            if(index === -1){
+                index = len-1;
+                oUl.style.left = -moveImg*(index+1) + 'px';
+            }
+        });
+
+        // 让小球运动
+        /*
+        *   index       right
+        *   0           0
+        *   -1/5        32*5 = 160
+        * */
+        if(index === -1){
+            animation(oBall,{
+                left:-40,
+                opacity:0
+            },0.15,function(){
+                this.style.left = 200 + 'px';
+                animation(this,{
+                    left:moveBall*(len-1),
+                    opacity:1
+                },0.15)
+            })
+        }else{
+            animation(oBall,{
+                left:moveBall*index
+            },0.3)
+        }
+    },false);
+
+    // 点击右边轮播
+    /*
+    *   index       left
+    *   0           -538
+    *   1           -538-538
+    *   2           -538-538-538
+    *
+    * */
+    oRight.addEventListener('click',function(){
+        if(new Date() - now<300)return;
+        now = new Date();
+        index++;
+        // console.log(index);
+        animation(oUl,{                         // 让 oul移动
+            left:-moveImg*(index+1)
+        },0.3,function(){
+            if(index === len){                  // 当点击次数为len时，清除点击次数，并且强制将oUl的left值回到初始值
+                index = 0;                      // 清除点击次数
+                oUl.style.left = -moveImg*(index+1) + 'px';     // 强制设置oUl的left值为初始值
+            }
+        });
+
+        // 让小球运动
+        /*
+        *   index       left
+        *   0           0
+        *   1           0+32
+        *   2           0+32+32
+        * */
+        if(index === len){
+            animation(oBall,{
+                left:200,       // 终点left值为200
+                opacity:0
+            },0.15,function(){
+                this.style.left = 0;
+                animation(this,{
+                    opacity:1
+                },0.15)
+            })
+        }else{
+            animation(oBall,{
+                left:moveBall*index
+            },0.3)
+        }
+    },false);
+
+    for(var i=0;i<oSpan.length;i++){
+        oSpan[i].index = i;
+        // console.log(oSpan[i], oSpan[i].index);
+    }
+    // 点击小圆点移动：监听oBthList的点击，通过事件委托的形式
+
+    oBthList.addEventListener('click',function(e){
+        index = e.target.index;                 // 修正index值，不让下次点击点击right按钮会轮播顺序错乱
+        if(e.target.nodeName === 'SPAN'){       // 如果点击的是span区域
+            animation(oUl,{                     // 让oUl运动
+                left:-moveImg*(index+1)
+            },0.3);
+            animation(oBall,{                   // 让oBall运动
+                left:moveBall*index
+            },0.3)
+        }
+    },false)
+
+</script>
+</body>
+</html>
